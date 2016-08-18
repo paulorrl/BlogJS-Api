@@ -1,0 +1,24 @@
+{
+  "name": "blogapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulorrl/BlogJS-Api.git"
+  },
+  "author": "Paulo Rodrigues",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/paulorrl/BlogJS-Api/issues"
+  },
+  "homepage": "https://github.com/paulorrl/BlogJS-Api#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.7.1",
+    "express": "^4.14.0"
+  }
+}
