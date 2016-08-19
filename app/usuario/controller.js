@@ -2,23 +2,39 @@ var usuarios = require('./usuarios');
 
 var cadastrar = function (req, res) {
     var usuario = req.body;
-    res.status(201).json(usuarios.cadastrar(usuario));
+    usuarios.cadastrar(usuario, function(resultado) {
+        res.status(201).json(resultado);
+    }, function(erro) {
+        res.status(400).json(erro);
+    });
 };
 
 var listar = function(req, res) {
-    res.status(200).json(usuarios.listar());
+    usuarios.listar(function(usuarios) {
+        res.status(200).json(usuarios   );
+    }, function(erro) {
+        res.status(400).json(erro);
+    });
 };
 
 var autenticar = function(req, res) {
-    var autenticado = usuarios.autenticar(req.body.login, req.body.senha);
-    if (autenticado) {
-        autenticado.senha = '';
-        res.status(200).json(autenticado);
-    } else {
-        res.status(401).end();
-    }
+    usuarios.autenticar(req.body.login, req.body.senha, function(usuario) {
+        res.status(200).json(usuario);
+    }, function(erro) {
+        res.status(400).json(erro);
+    });
+};
+
+var buscar = function(req, res) {
+    var id = req.params.id;
+    usuarios.buscar(id, function(usuario) {
+        res.status(200).json(usuario);
+    }, function(erro) {
+        res.status(400).json(erro);
+    });
 };
 
 exports.cadastrar = cadastrar;
 exports.listar = listar;
 exports.autenticar = autenticar;
+exports.buscar = buscar;
