@@ -1,5 +1,16 @@
 var Post = require('./modelo');
 
+var listarTodos = function(quandoListar, quandoDerErro) {
+    Post.find()
+        .exec(function(err, posts) {
+            if (err) {
+                quandoDerErro(err);
+            } else {
+                quandoListar(posts);
+            }
+        });
+};
+
 var listarPorUsuario = function(usuarioId, quandoListar, quandoDerErro) {
     Post.find({ dono:usuarioId })
         .exec(function(err, posts) {
@@ -32,6 +43,7 @@ var buscar = function(postId, donoId, quandoEncontrar, quandoDerErro) {
         });
 };
 
+exports.listarTodos = listarTodos;
 exports.listarPorUsuario = listarPorUsuario;
 exports.cadastrar = cadastrar;
 exports.buscar = buscar;
