@@ -20,6 +20,7 @@ var listar = function(req, res) {
 var autenticar = function(req, res) {
     usuarios.autenticar(req.body.login, req.body.senha, function(usuario) {
         res.status(200).json(usuario);
+
     }, function(erro) {
         res.status(400).json(erro);
     });
@@ -29,6 +30,7 @@ var buscar = function(req, res) {
     var id = req.params.id;
     usuarios.buscar(id, function(usuario) {
         res.status(200).json(usuario);
+
     }, function(erro) {
         res.status(400).json(erro);
     });
