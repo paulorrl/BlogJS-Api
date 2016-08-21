@@ -1,12 +1,33 @@
 var Post = require('./modelo');
 
-var listarTodos = function(quandoListar, quandoDerErro) {
-    Post.find()
-        .exec(function(err, posts) {
+var cadastrar = function(post, quandoSalvar, quandoDerErro) {
+    new Post(post).save(function(err, resultado) {
+        if (err) {
+            quandoDerErro(err);
+        } else {
+            quandoSalvar(resultado);
+        }
+    });
+};
+
+var buscarPorDonoEId = function(postId, donoId, quandoEncontrar, quandoDerErro) {
+    Post.findOne({ _id:postId, dono:donoId })
+        .exec(function(err, post) {
             if (err) {
                 quandoDerErro(err);
             } else {
-                quandoListar(posts);
+                quandoEncontrar(post);
+            }
+        });
+};
+
+var buscarPorId = function(postId, quandoEncontrar, quandoDerErro) {
+    Post.findById(postId)
+        .exec(function(err, post) {
+            if (err) {
+                quandoDerErro(err);
+            } else {
+                quandoEncontrar(post);
             }
         });
 };
@@ -22,28 +43,48 @@ var listarPorUsuario = function(usuarioId, quandoListar, quandoDerErro) {
         });
 };
 
-var cadastrar = function(post, quandoSalvar, quandoDerErro) {
-    new Post(post).save(function(err, resultado) {
-        if (err) {
-            quandoDerErro(err);
-        } else {
-            quandoSalvar(resultado);
-        }
-    });
-};
-
-var buscar = function(postId, donoId, quandoEncontrar, quandoDerErro) {
-    Post.findOne({ _id:postId, dono:donoId })
-        .exec(function(err, post) {
+var listarPorTitulo = function(pagina, maximoItens, titulo, quandoListar, quandoDerErro) {
+    Post.paginate({ titulo:new RegExp(titulo, "i") }, {page:pagina, limit:maximoItens}, function(err, posts) {
             if (err) {
                 quandoDerErro(err);
             } else {
-                quandoEncontrar(post);
+                quandoListar(posts);
             }
         });
 };
 
-exports.listarTodos = listarTodos;
-exports.listarPorUsuario = listarPorUsuario;
+var listarTodos = function(pagina, maximoItens, quandoListar, quandoDerErro) {
+    Post.paginate({}, {page:pagina, limit:maximoItens}, function(err, posts) {
+            if (err) {
+                quandoDerErro(err);
+            } else {
+                quandoListar(posts);
+            }
+        });
+};
+
+var adicionarComentario = function(postId, comentario, quandoAdicionar, quandoDerErro) {
+    Post.findById(postId)
+        .exec(function(err, post) {
+            if (err) {
+                quandoDerErro(err);
+            } else {
+                post.comentarios.push({usuario:comentario.email,conteudo:comentario.conteudo});
+                post.save(function(erro) {
+                    if (erro) {
+                        quandoDerErro(erro);
+                    } else {
+                        quandoAdicionar(post);
+                    }
+                });
+            }
+        });
+};
+
 exports.cadastrar = cadastrar;
-exports.buscar = buscar;
+exports.buscarPorDonoEId = buscarPorDonoEId;
+exports.buscarPorId = buscarPorId;
+exports.listarPorUsuario = listarPorUsuario;
+exports.listarPorTitulo = listarPorTitulo;
+exports.listarTodos = listarTodos;
+exports.adicionarComentario = adicionarComentario;
