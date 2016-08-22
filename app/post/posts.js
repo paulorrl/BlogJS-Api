@@ -10,6 +10,25 @@ var cadastrar = function(post, quandoSalvar, quandoDerErro) {
     });
 };
 
+var atualizar = function(novoPost, quandoAtualizar, quandoDerErro) {
+    Post.findOne({_id:novoPost.id, dono:novoPost.dono})
+        .exec(function(err, post) {
+            if (err) {
+                quandoDerErro(err);
+            } else {
+                post.titulo = novoPost.titulo;
+                post.conteudo = novoPost.conteudo;
+                post.save(function(erro, resultado) {
+                    if (erro) {
+                        quandoDerErro(erro);
+                    } else {
+                        quandoAtualizar(post);
+                    }
+                });
+            }
+        });
+};
+
 var buscarPorDonoEId = function(postId, donoId, quandoEncontrar, quandoDerErro) {
     Post.findOne({ _id:postId, dono:donoId })
         .exec(function(err, post) {
@@ -82,6 +101,7 @@ var adicionarComentario = function(postId, comentario, quandoAdicionar, quandoDe
 };
 
 exports.cadastrar = cadastrar;
+exports.atualizar = atualizar;
 exports.buscarPorDonoEId = buscarPorDonoEId;
 exports.buscarPorId = buscarPorId;
 exports.listarPorUsuario = listarPorUsuario;
