@@ -1,11 +1,19 @@
 var Post = require('./modelo');
+var respostas = require('../utilidades/respostas');
 
 var cadastrar = function(post, quandoSalvar, quandoDerErro) {
-    new Post(post).save(function(err, resultado) {
-        if (err) {
-            quandoDerErro(err);
+    new Post(post).save(respostas.tratar(quandoSalvar, quandoDerErro));
+};
+
+var atualizarDadosPost = function(post, novoPost, quandoAtualizar, quandoDerErro) {
+    post.titulo = novoPost.titulo;
+    post.conteudo = novoPost.conteudo;
+
+    post.save(function(erro, resultado) {
+        if (erro) {
+            quandoDerErro(erro);
         } else {
-            quandoSalvar(resultado);
+            quandoAtualizar(post);
         }
     });
 };
@@ -16,70 +24,45 @@ var atualizar = function(novoPost, quandoAtualizar, quandoDerErro) {
             if (err) {
                 quandoDerErro(err);
             } else {
-                post.titulo = novoPost.titulo;
-                post.conteudo = novoPost.conteudo;
-                post.save(function(erro, resultado) {
-                    if (erro) {
-                        quandoDerErro(erro);
-                    } else {
-                        quandoAtualizar(post);
-                    }
-                });
+                atualizarDadosPost(post, novoPost, quandoAtualizar, quandoDerErro);
             }
         });
 };
 
 var buscarPorDonoEId = function(postId, donoId, quandoEncontrar, quandoDerErro) {
     Post.findOne({ _id:postId, dono:donoId })
-        .exec(function(err, post) {
-            if (err) {
-                quandoDerErro(err);
-            } else {
-                quandoEncontrar(post);
-            }
-        });
+        .exec(respostas.tratar(quandoEncontrar, quandoDerErro));
 };
 
 var buscarPorId = function(postId, quandoEncontrar, quandoDerErro) {
     Post.findById(postId)
-        .exec(function(err, post) {
-            if (err) {
-                quandoDerErro(err);
-            } else {
-                quandoEncontrar(post);
-            }
-        });
+        .exec(respostas.tratar(quandoEncontrar, quandoDerErro));
 };
 
 var listarPorUsuario = function(usuarioId, quandoListar, quandoDerErro) {
     Post.find({ dono:usuarioId })
-        .exec(function(err, posts) {
-            if (err) {
-                quandoDerErro(err);
-            } else {
-                quandoListar(posts);
-            }
-        });
+        .exec(respostas.tratar(quandoListar, quandoDerErro));
 };
 
 var listarPorTitulo = function(pagina, maximoItens, titulo, quandoListar, quandoDerErro) {
-    Post.paginate({ titulo:new RegExp(titulo, "i") }, {page:pagina, limit:maximoItens}, function(err, posts) {
-            if (err) {
-                quandoDerErro(err);
-            } else {
-                quandoListar(posts);
-            }
-        });
+    var query = { titulo:new RegExp(titulo, "i") };
+    var paginacao = {page:pagina, limit:maximoItens};
+    Post.paginate(query, paginacao, respostas.tratar(quandoListar, quandoDerErro));
 };
 
 var listarTodos = function(pagina, maximoItens, quandoListar, quandoDerErro) {
-    Post.paginate({}, {page:pagina, limit:maximoItens}, function(err, posts) {
-            if (err) {
-                quandoDerErro(err);
-            } else {
-                quandoListar(posts);
-            }
-        });
+    Post.paginate({}, {page:pagina, limit:maximoItens}, respostas.tratar(quandoListar, quandoDerErro));
+};
+
+var setarNovoComentario = function(post, comentario, quandoAdicionar, quandoDerErro) {
+    post.comentarios.push({usuario:comentario.email,conteudo:comentario.conteudo});
+    post.save(function(erro) {
+        if (erro) {
+            quandoDerErro(erro);
+        } else {
+            quandoAdicionar(post);
+        }
+    });
 };
 
 var adicionarComentario = function(postId, comentario, quandoAdicionar, quandoDerErro) {
@@ -88,14 +71,7 @@ var adicionarComentario = function(postId, comentario, quandoAdicionar, quandoDe
             if (err) {
                 quandoDerErro(err);
             } else {
-                post.comentarios.push({usuario:comentario.email,conteudo:comentario.conteudo});
-                post.save(function(erro) {
-                    if (erro) {
-                        quandoDerErro(erro);
-                    } else {
-                        quandoAdicionar(post);
-                    }
-                });
+                setarNovoComentario(post, comentario, quandoAdicionar, quandoDerErro);
             }
         });
 };
